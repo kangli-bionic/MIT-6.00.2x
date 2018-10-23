@@ -40,6 +40,10 @@ class Edge(object):
         """Return direction."""
         return self._src.name + '->' + self._dest.name
 
+    def __repr__(self):
+        """Rep call str."""
+        return str(self)
+
 
 class Digraph(object):
     """Represent directed graph."""
