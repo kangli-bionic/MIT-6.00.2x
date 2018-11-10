@@ -49,7 +49,7 @@ class Field(object):
             raise ValueError('Duplicated dunk')
         self.drunks[drunk] = location
 
-    def localate_drunk(self, drunk):
+    def locate_drunk(self, drunk):
         """Return drunk in field."""
         if drunk not in self.drunks:
             raise ValueError('Drunk not in field')
@@ -100,10 +100,10 @@ def walk(field, drunk, num_steps):
     Move drunk num_steps times; returns the distance between the final location
     and the location at the start of the walk.
     """
-    start = field.localate_drunk(drunk)
+    start = field.locate_drunk(drunk)
     for s in range(num_steps):
         field.move_drunk(drunk)
-    return start.distance_from(field.localate_drunk(drunk))
+    return start.distance_from(field.locate_drunk(drunk))
 
 
 def simulate_walks(num_steps, num_trials, drunk_class):
@@ -158,4 +158,4 @@ def simulate_all(drunk_kinds, walk_lengths, num_trials):
 
 # drunk_test((10, 100, 1000, 10000), 100, UsualDrunk)
 # drunk_test((0, 1, 2), 100, UsualDrunk)
-simulate_all((UsualDrunk, ColdDrunk), (1, 2, 10, 100, 1000, 10000), 100)
+# simulate_all((UsualDrunk, ColdDrunk), (1, 2, 10, 100, 1000, 10000), 100)
