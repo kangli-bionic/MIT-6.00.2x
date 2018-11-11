@@ -1,6 +1,7 @@
 """6.00.2x Problem Set 2: Simulating robots."""
 
 import math
+import pylab
 import random
 
 # Required code for using numpy in grader:
@@ -355,69 +356,46 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials, ro
     return mean
 
 
-# random.seed(0)
-# testRobotMovement(StandardRobot, RectangularRoom)
-print(runSimulation(
-    num_robots=1,
-    speed=1.0,
-    width=6,
-    height=6,
-    min_coverage=1,
-    num_trials=500,
-    robot_type=StandardRobot
-))
-print(runSimulation(
-    num_robots=1,
-    speed=1.0,
-    width=6,
-    height=6,
-    min_coverage=1,
-    num_trials=500,
-    robot_type=RandomWalkRobot
-))
+def showPlot1(title, x_label, y_label):
+    """Show plot 1."""
+    num_robot_range = range(1, 11)
+    times1 = []
+    times2 = []
+    for num_robots in num_robot_range:
+        print("Plotting", num_robots, "robots...")
+        times1.append(runSimulation(num_robots, 1.0, 20, 20, 0.8, 20, StandardRobot))
+        times2.append(runSimulation(num_robots, 1.0, 20, 20, 0.8, 20, RandomWalkRobot))
+    pylab.plot(num_robot_range, times1)
+    pylab.plot(num_robot_range, times2)
+    pylab.title(title)
+    pylab.legend(('StandardRobot', 'RandomWalkRobot'))
+    pylab.xlabel(x_label)
+    pylab.ylabel(y_label)
+    pylab.show()
 
 
-# def showPlot1(title, x_label, y_label):
-#     """
-#     What information does the plot produced by this function tell you?
-#     """
-#     num_robot_range = range(1, 11)
-#     times1 = []
-#     times2 = []
-#     for num_robots in num_robot_range:
-#         print("Plotting", num_robots, "robots...")
-#         times1.append(runSimulation(num_robots, 1.0, 20, 20, 0.8, 20, StandardRobot))
-#         times2.append(runSimulation(num_robots, 1.0, 20, 20, 0.8, 20, RandomWalkRobot))
-#     pylab.plot(num_robot_range, times1)
-#     pylab.plot(num_robot_range, times2)
-#     pylab.title(title)
-#     pylab.legend(('StandardRobot', 'RandomWalkRobot'))
-#     pylab.xlabel(x_label)
-#     pylab.ylabel(y_label)
-#     pylab.show()
+def showPlot2(title, x_label, y_label):
+    """Show plot 1."""
+    aspect_ratios = []
+    times1 = []
+    times2 = []
+    for width in [10, 20, 25, 50]:
+        height = 300//width
+        print("Plotting cleaning time for a room of width:", width, "by height:", height)
+        aspect_ratios.append(float(width) / height)
+        times1.append(runSimulation(2, 1.0, width, height, 0.8, 200, StandardRobot))
+        times2.append(runSimulation(2, 1.0, width, height, 0.8, 200, RandomWalkRobot))
+    pylab.plot(aspect_ratios, times1)
+    pylab.plot(aspect_ratios, times2)
+    pylab.title(title)
+    pylab.legend(('StandardRobot', 'RandomWalkRobot'))
+    pylab.xlabel(x_label)
+    pylab.ylabel(y_label)
+    pylab.show()
 
 
-# def showPlot2(title, x_label, y_label):
-#     """
-#     What information does the plot produced by this function tell you?
-#     """
-#     aspect_ratios = []
-#     times1 = []
-#     times2 = []
-#     for width in [10, 20, 25, 50]:
-#         height = 300//width
-#         print("Plotting cleaning time for a room of width:", width, "by height:", height)
-#         aspect_ratios.append(float(width) / height)
-#         times1.append(runSimulation(2, 1.0, width, height, 0.8, 200, StandardRobot))
-#         times2.append(runSimulation(2, 1.0, width, height, 0.8, 200, RandomWalkRobot))
-#     pylab.plot(aspect_ratios, times1)
-#     pylab.plot(aspect_ratios, times2)
-#     pylab.title(title)
-#     pylab.legend(('StandardRobot', 'RandomWalkRobot'))
-#     pylab.xlabel(x_label)
-#     pylab.ylabel(y_label)
-#     pylab.show()
-
+showPlot1('Time/Robots (fixed room size)', 'Robots', 'Time taken (clock ticks)')
+showPlot2('Time/Room size (with 2 robots)', 'Room size', 'Time taken (clock ticks)')
 
 # === Problem 6
 # NOTE: If you are running the simulation, you will have to close it
@@ -436,3 +414,24 @@ print(runSimulation(
 #
 #       (... your call here ...)
 #
+
+# random.seed(0)
+# testRobotMovement(StandardRobot, RectangularRoom)
+# print(runSimulation(
+#     num_robots=1,
+#     speed=1.0,
+#     width=6,
+#     height=6,
+#     min_coverage=1,
+#     num_trials=500,
+#     robot_type=StandardRobot
+# ))
+# print(runSimulation(
+#     num_robots=1,
+#     speed=1.0,
+#     width=6,
+#     height=6,
+#     min_coverage=1,
+#     num_trials=500,
+#     robot_type=RandomWalkRobot
+# ))
