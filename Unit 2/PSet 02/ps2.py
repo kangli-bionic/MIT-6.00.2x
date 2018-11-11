@@ -8,6 +8,8 @@ import random
 # os.environ["OPENBLAS_NUM_THREADS"] = "1"
 import numpy as np
 
+from aux import testRobotMovement
+
 
 class Position(object):
     """Position.
@@ -52,8 +54,8 @@ class Position(object):
         delta_y = speed * math.cos(math.radians(angle))
         delta_x = speed * math.sin(math.radians(angle))
 
-        new_x = self.x + delta_x
-        new_y = self.y + delta_y
+        new_x = self._x + delta_x
+        new_y = self._y + delta_y
         return Position(new_x, new_y)
 
     def __str__(self):
@@ -166,121 +168,169 @@ class RectangularRoom(object):
         return (0 <= position.getX() < self._cols) and (0 <= position.getY() < self._rows)
 
 
-r = RectangularRoom(5, 8)
-p = r.get_random_position()
-print(p)
-print(r.total_tiles_count)
-# === Problem 2
-# class Robot(object):
-#     """
-#     Represents a robot cleaning a particular room.
+class Robot(object):
+    """Robot.
 
-#     At all times the robot has a particular position and direction in the room.
-#     The robot also has a fixed speed.
+    Represents a robot cleaning a particular room.
 
-#     Subclasses of Robot should provide movement strategies by implementing
-#     updatePositionAndClean(), which simulates a single time-step.
-#     """
-#     def __init__(self, room, speed):
-#         """
-#         Initializes a Robot with the given speed in the specified room. The
-#         robot initially has a random direction and a random position in the
-#         room. The robot cleans the tile it is on.
+    At all times the robot has a particular position and direction in the room.
+    The robot also has a fixed speed.
 
-#         room:  a RectangularRoom object.
-#         speed: a float (speed > 0)
-#         """
-#         raise NotImplementedError
+    Subclasses of Robot should provide movement strategies by implementing
+    updatePositionAndClean(), which simulates a single time-step.
+    """
 
-#     def getRobotPosition(self):
-#         """
-#         Return the position of the robot.
+    def __init__(self, room, speed):
+        """Initialize Robot.
 
-#         returns: a Position object giving the robot's position.
-#         """
-#         raise NotImplementedError
+        Initializes a Robot with the given speed in the specified room. The
+        robot initially has a random direction and a random position in the
+        room. The robot cleans the tile it is on.
 
-#     def getRobotDirection(self):
-#         """
-#         Return the direction of the robot.
+        Parameters
+        ----------
+        room: RectangularRoom
+        speed: float
+            Speed is always > 0
 
-#         returns: an integer d giving the direction of the robot as an angle in
-#         degrees, 0 <= d < 360.
-#         """
-#         raise NotImplementedError
+        """
+        self.room = room
+        self.speed = speed
+        self.direction = random.randint(1, 360)
 
-#     def setRobotPosition(self, position):
-#         """
-#         Set the position of the robot to POSITION.
+        self.position = room.getRandomPosition()  # Put robot in a random position inside the room
+        room.cleanTileAtPosition(self.position)  # Clean the tile the robot is standing on
 
-#         position: a Position object.
-#         """
-#         raise NotImplementedError
+    def getRobotPosition(self):
+        """Return the position of the robot."""
+        return self.position
 
-#     def setRobotDirection(self, direction):
-#         """
-#         Set the direction of the robot to DIRECTION.
+    def getRobotDirection(self):
+        """Return the direction of the robot.
 
-#         direction: integer representing an angle in degrees
-#         """
-#         raise NotImplementedError
+        Returns
+        -------
+        int
+            An integer d giving the direction of the robot as an angle in
+            degrees, 0 <= d < 360.
 
-#     def updatePositionAndClean(self):
-#         """
-#         Simulate the passage of a single time-step.
+        """
+        return self.direction
 
-#         Move the robot to a new position and mark the tile it is on as having
-#         been cleaned.
-#         """
-#         raise NotImplementedError # don't change this!
+    def setRobotPosition(self, position):
+        """Set the position of the robot.
 
+        Parameters
+        ----------
+        position: Position
 
-# # === Problem 3
-# class StandardRobot(Robot):
-#     """
-#     A StandardRobot is a Robot with the standard movement strategy.
+        """
+        self.position = position
 
-#     At each time-step, a StandardRobot attempts to move in its current
-#     direction; when it would hit a wall, it *instead* chooses a new direction
-#     randomly.
-#     """
-#     def updatePositionAndClean(self):
-#         """
-#         Simulate the passage of a single time-step.
+    def setRobotDirection(self, direction):
+        """Set the direction of the robot.
 
-#         Move the robot to a new position and mark the tile it is on as having
-#         been cleaned.
-#         """
-#         raise NotImplementedError
+        Parameters
+        ----------
+        direction: int
+            Represents an angle in degrees, o <= direction < 360
+
+        """
+        self.direction = direction
+
+    def updatePositionAndClean(self):
+        """
+        Simulate the passage of a single time-step.
+
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
+        """
+        raise NotImplementedError
 
 
-# # Uncomment this line to see your implementation of StandardRobot in action!
-# ##testRobotMovement(StandardRobot, RectangularRoom)
+class StandardRobot(Robot):
+    """Standard Robot.
+
+    A StandardRobot is a Robot with the standard movement strategy.
+
+    At each time-step, a StandardRobot attempts to move in its current
+    direction; when it would hit a wall, it *instead* chooses a new direction
+    randomly.
+    """
+
+    def updatePositionAndClean(self):
+        """
+        Simulate the passage of a single time-step.
+
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
+        """
+        current_position = self.getRobotPosition()
+        next_position = current_position.getNewPosition(self.getRobotDirection(), self.speed)
+        valid_position = self.room.isPositionInRoom(next_position)
+        while (not valid_position):
+            self.setRobotDirection(random.randint(0, 360))
+            next_position = current_position.getNewPosition(self.getRobotDirection(), self.speed)
+            valid_position = self.room.isPositionInRoom(next_position)
+            next_position = self.room.getRandomPosition()
+        self.setRobotPosition(next_position)
+        self.room.cleanTileAtPosition(next_position)
 
 
-# # === Problem 4
-# def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
-#                   robot_type):
-#     """
-#     Runs NUM_TRIALS trials of the simulation and returns the mean number of
-#     time-steps needed to clean the fraction MIN_COVERAGE of the room.
+# testRobotMovement(StandardRobot, RectangularRoom)
 
-#     The simulation is run with NUM_ROBOTS robots of type ROBOT_TYPE, each with
-#     speed SPEED, in a room of dimensions WIDTH x HEIGHT.
 
-#     num_robots: an int (num_robots > 0)
-#     speed: a float (speed > 0)
-#     width: an int (width > 0)
-#     height: an int (height > 0)
-#     min_coverage: a float (0 <= min_coverage <= 1.0)
-#     num_trials: an int (num_trials > 0)
-#     robot_type: class of robot to be instantiated (e.g. StandardRobot or
-#                 RandomWalkRobot)
-#     """
-#     raise NotImplementedError
+def runSimulation(num_robots, speed, width, height, min_coverage, num_trials, robot_type):
+    """Run simulation.
 
-# # Uncomment this line to see how much your simulation takes on average
-# ##print(runSimulation(1, 1.0, 10, 10, 0.75, 30, StandardRobot))
+    Runs NUM_TRIALS trials of the simulation and returns the mean number of
+    time-steps needed to clean the fraction MIN_COVERAGE of the room.
+
+    The simulation is run with NUM_ROBOTS robots of type ROBOT_TYPE, each with
+    speed SPEED, in a room of dimensions WIDTH x HEIGHT.
+
+    num_robots: an int (num_robots > 0)
+    speed: a float (speed > 0)
+    width: an int (width > 0)
+    height: an int (height > 0)
+    min_coverage: a float (0 <= min_coverage <= 1.0)
+    num_trials: an int (num_trials > 0)
+    robot_type: class of robot to be instantiated (e.g. StandardRobot or RandomWalkRobot)
+    """
+    clock_ticks = []
+    for trial in range(num_trials):
+        room = RectangularRoom(width, height)
+        robots = []
+        ticks = 0
+        for r in range(num_robots):
+            robot = robot_type(room, speed)
+            robots.append(robot)
+
+        tiles = room.getNumTiles()
+        clean_tiles = room.getNumCleanedTiles()
+        coverage = clean_tiles / tiles
+        while coverage < min_coverage:
+            clean_tiles = room.getNumCleanedTiles()
+            for robot in robots:
+                robot.updatePositionAndClean()
+            ticks += 1
+            coverage = clean_tiles / tiles
+        clock_ticks.append(ticks - 1)
+
+    mean = sum(clock_ticks) / num_trials
+    return mean
+
+
+# random.seed(0)
+print(runSimulation(
+    num_robots=1,
+    speed=1.0,
+    width=5,
+    height=5,
+    min_coverage=1,
+    num_trials=100,
+    robot_type=StandardRobot
+))
 
 
 # # === Problem 5
