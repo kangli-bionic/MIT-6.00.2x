@@ -8,7 +8,8 @@ import random
 # os.environ["OPENBLAS_NUM_THREADS"] = "1"
 import numpy as np
 
-from aux import testRobotMovement
+# from aux import testRobotMovement
+import ps2_visualize
 
 
 class Position(object):
@@ -272,12 +273,32 @@ class StandardRobot(Robot):
             self.setRobotDirection(random.randint(0, 360))
             next_position = current_position.getNewPosition(self.getRobotDirection(), self.speed)
             valid_position = self.room.isPositionInRoom(next_position)
-            next_position = self.room.getRandomPosition()
         self.setRobotPosition(next_position)
         self.room.cleanTileAtPosition(next_position)
 
 
-# testRobotMovement(StandardRobot, RectangularRoom)
+class RandomWalkRobot(Robot):
+    """RandomWalk Robot.
+
+    A RandomWalkRobot is a robot with the "random walk" movement strategy: it
+    chooses a new direction at random at the end of each time-step.
+    """
+
+    def updatePositionAndClean(self):
+        """
+        Simulate the passage of a single time-step.
+
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
+        """
+        current_position = self.getRobotPosition()
+        valid_position = False
+        while (not valid_position):
+            self.setRobotDirection(random.randint(0, 360))
+            next_position = current_position.getNewPosition(self.getRobotDirection(), self.speed)
+            valid_position = self.room.isPositionInRoom(next_position)
+        self.setRobotPosition(next_position)
+        self.room.cleanTileAtPosition(next_position)
 
 
 def runSimulation(num_robots, speed, width, height, min_coverage, num_trials, robot_type):
@@ -299,6 +320,9 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials, ro
     """
     clock_ticks = []
     for trial in range(num_trials):
+        # ANIMATION: Comment this for submission
+        # anim = ps2_visualize.RobotVisualization(num_robots, width, height, 0.05)
+
         room = RectangularRoom(width, height)
         robots = []
         ticks = 0
@@ -309,44 +333,48 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials, ro
         tiles = room.getNumTiles()
         clean_tiles = room.getNumCleanedTiles()
         coverage = clean_tiles / tiles
+
+        # ANIMATION: Comment this for submission
+        # anim.update(room, robots)
         while coverage < min_coverage:
             clean_tiles = room.getNumCleanedTiles()
             for robot in robots:
                 robot.updatePositionAndClean()
             ticks += 1
             coverage = clean_tiles / tiles
+
+            # ANIMATION: Comment this for submission
+            # anim.update(room, robots)
+
         clock_ticks.append(ticks - 1)
+
+        # ANIMATION: Comment this for submission
+        # anim.done()
 
     mean = sum(clock_ticks) / num_trials
     return mean
 
 
 # random.seed(0)
+# testRobotMovement(StandardRobot, RectangularRoom)
 print(runSimulation(
     num_robots=1,
     speed=1.0,
-    width=5,
-    height=5,
+    width=6,
+    height=6,
     min_coverage=1,
-    num_trials=100,
+    num_trials=500,
     robot_type=StandardRobot
 ))
-
-
-# # === Problem 5
-# class RandomWalkRobot(Robot):
-#     """
-#     A RandomWalkRobot is a robot with the "random walk" movement strategy: it
-#     chooses a new direction at random at the end of each time-step.
-#     """
-#     def updatePositionAndClean(self):
-#         """
-#         Simulate the passage of a single time-step.
-
-#         Move the robot to a new position and mark the tile it is on as having
-#         been cleaned.
-#         """
-#         raise NotImplementedError
+print(runSimulation(
+    num_robots=1,
+    speed=1.0,
+    width=6,
+    height=6,
+    min_coverage=1,
+    num_trials=500,
+    robot_type=RandomWalkRobot
+))
 
 
 # def showPlot1(title, x_label, y_label):
